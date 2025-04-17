@@ -8,6 +8,9 @@ export const blogRouter = new Hono<{
     Bindings: {
         DATABASE_URL: string
     }
+    Variables: {
+        userId: string
+    }
 }>();
 
 
@@ -21,6 +24,9 @@ blogRouter.use('/*', async (c, next) => {
     if(!payload.id){
         return c.json({message:"Invalid token"},401)
     }
+    c.set('userId',payload.id as string);
+    console.log("User ID:", payload.id);
+    console.log("User ID from context:", c.get('userId'));
   await next()
 })
 
@@ -33,6 +39,7 @@ blogRouter.post('/blog', (c) => {
 
 
 blogRouter.post('/',async (c)=>{
+    const authorId=c.get('userId');
     const prisma = new PrismaClient({
         datasourceUrl:c.env.DATABASE_URL,
      }).$extends(withAccelerate());
@@ -42,7 +49,7 @@ blogRouter.post('/',async (c)=>{
         data:{
             title:body.title,
             content:body.content,
-            authorId: "442709e6-7f65-4231-b625-992ec6301a81"
+            authorId:authorId as string,
         }
      })
 
