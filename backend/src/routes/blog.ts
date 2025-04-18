@@ -20,6 +20,7 @@ blogRouter.use('/*', async (c, next) => {
         return c.json({message:"No token provided"},401)
     }
     const token=jwt.split(' ')[1];
+    try{
     const payload =await verify(token,"1234");
     if(!payload.id){
         return c.json({message:"Invalid token"},401)
@@ -28,14 +29,16 @@ blogRouter.use('/*', async (c, next) => {
     console.log("User ID:", payload.id);
     console.log("User ID from context:", c.get('userId'));
   await next()
+}catch(e){
+    console.log(e);
+    return c.json({message:"You are logged out"});
+}
 })
 
 
 
 
-blogRouter.post('/blog', (c) => {
-	return c.text('signin route')
-})
+
 
 
 blogRouter.post('/',async (c)=>{
@@ -90,6 +93,29 @@ blogRouter.get('/bulk',async (c)=>{
      const blogs=await prisma.post.findMany()
      return c.json({blogs});
 
+})
+
+
+
+blogRouter.get('/:id',async (c)=>{
+  const id=c.req.param('id') as string ;
+  const prisma = new PrismaClient({
+    datasourceUrl:c.env.DATABASE_URL,
+ }).$extends(withAccelerate());
+ console.log("Requested Blog ID:", id);
+
+  const blog=await prisma.post.findFirst({
+    where:{
+        id:id as string
+    }
+  })
+    if(!blog){
+        return c.json({message:"Blog not found"},404)
+    }
+    return c.json({
+        blog
+    })  
+   
 })
 
 
