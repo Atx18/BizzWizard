@@ -5,6 +5,7 @@ import { decode, sign, verify } from 'hono/jwt'
 import { useId } from 'hono/jsx';
 import { userRouter } from './routes/user';
 import { blogRouter } from './routes/blog';
+import { cors } from 'hono/cors'
 // Create the main Hono app
 const app = new Hono<{
 	Bindings: {
@@ -14,7 +15,7 @@ const app = new Hono<{
 // app.get('/', (c) => {
 //   return c.text('Hello Hono! This is the backend of the blog app.')
 // });
-
+app.use('/*', cors())
 app.route('/api/v1/user', userRouter);
 app.route('/api/v1/blog', blogRouter);
 
